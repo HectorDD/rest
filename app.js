@@ -31,6 +31,11 @@ app.use('/isUser', users);
 app.use('/cursesByName', users);
 app.use('/nameById', users);
 app.use('/userValidated', users);
+app.use('/getTalleres', users);
+app.use('/getDetallesTalleres', users);
+app.use('/getStatusDocument', users);
+app.use('/getCoursesByTeacher', index);
+app.use('/getStudentsByCourse', index);
 
 
 
