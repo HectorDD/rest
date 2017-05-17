@@ -107,28 +107,18 @@ router.post('/cursesByName', function(req, res, next) {
 router.post('/getTalleres', function(req, res, next) {
   var myUser = req.body.id;
   db_users.getTalleresbyId_Curso(myUser,function(rows2,fields){
-      res.json({talleres: rows2});
+      res.json({documentos: rows2});
   });
 });
 
 /*toma el estado del documento para actualizar la tarea*/
-router.post('/getStatusDocument', function(req, res, next) {
+router.post('/getDocument', function(req, res, next) {
   var id_activity= req.body.id_activity;
   var id_user= req.body.id_user;
   var estado = "";
-  db_users.getStatusDocument(id_activity,id_user,function(rows,fields){
-    if (rows == -1){
-      estado = "Pendiente";
-      res.json({estado: estado});
-    }
-    else{
-        if (rows[0]["nota"]==null){
-           estado = "Subido";
-        }else {
-           estado = "Calificado";
-        }
-        res.json({estado: estado, nota: rows[0]["nota"]});
-    }
+  db_users.getDocument(id_activity,id_user,function(rows,fields){
+    res.json({documento: rows});
+    
     
   });
 });
@@ -173,6 +163,43 @@ router.post('/getDetallesTalleres', function(req, res, next) {
   });
 });
 
+/*toma los talleres de los cursos en donde esta matriculado el estudiante basado en su nombre*/
+router.post('/getTalleresPendientes', function(req, res, next) {
+  var myUser = req.body.id;
+  db_users.getTalleresPendientes(myUser,function(rows2,fields){
+      for (var i in rows2) {
+        var hoy = new Date();
+        var estado = "Pendiente";
+        var TotalDias = Math.abs(rows2[i]["fecha_fin"].getTime() - rows2[i]["fecha_inicio"].getTime());
+        var ParcialDias = Math.abs(rows2[i]["fecha_fin"].getTime() - hoy.getTime());
+        var tDias= Math.ceil(TotalDias / (1000 * 3600 * 24));
+        var pDias= Math.ceil(ParcialDias / (1000 * 3600 * 24));
+        var porcent = (pDias/tDias);
+        if (porcent >= 1){
+          rows2[i].porcentaje = 100
+        }else{
+          rows2[i].porcentaje = (porcent*100);
+        }
+        var dfin = rows2[i]["fecha_fin"].getDate();
+        var dini = rows2[i]["fecha_inicio"].getDate();
+        var mfin = rows2[i]["fecha_fin"].getMonth(); + 1
+        var mini = rows2[i]["fecha_inicio"].getMonth(); + 1
+        var afin = rows2[i]["fecha_fin"].getFullYear();
+        var aini = rows2[i]["fecha_inicio"].getFullYear();
+        
+        var fin = mfin+'/'+dfin+'/'+afin;
+        var inicio = mini+'/'+dini+'/'+aini;
+        
+        rows2[i].estado = estado;
+        rows2[i]["fecha_inicio"] = inicio;
+        rows2[i]["fecha_fin"] = fin;
+      }
+      res.json({talleres: rows2});
+  });
+});
+
+
+
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Servicio rest SNJ' });
 });
@@ -181,6 +208,67 @@ router.post('/getCoursesByTeacher', function(req, res, next) {
   var myUser = req.body.id;
   db_users.getCoursesByTeacher(myUser,function(rows2,fields){
     res.json({cursos : rows2});
+  });
+});
+
+router.post('/getDetailActivitiesCoursesByTeacher', function(req, res, next) {
+  var myUser = req.body.id;
+  db_users.getDetailActivitiesCoursesByTeacher(myUser,function(rows2,fields){
+    for (var i in rows2) {
+        var hoy = new Date();
+        var estado = "Pendiente";
+        var TotalDias = Math.abs(rows2[i]["fecha_fin"].getTime() - rows2[i]["fecha_inicio"].getTime());
+        var ParcialDias = Math.abs(rows2[i]["fecha_fin"].getTime() - hoy.getTime());
+        var tDias= Math.ceil(TotalDias / (1000 * 3600 * 24));
+        var pDias= Math.ceil(ParcialDias / (1000 * 3600 * 24));
+        var porcent = (pDias/tDias);
+        if (porcent >= 1){
+          rows2[i].porcentaje = 100
+        }else{
+          rows2[i].porcentaje = (porcent*100);
+        }
+        var dfin = rows2[i]["fecha_fin"].getDate();
+        var dini = rows2[i]["fecha_inicio"].getDate();
+        var mfin = rows2[i]["fecha_fin"].getMonth(); + 1
+        var mini = rows2[i]["fecha_inicio"].getMonth(); + 1
+        var afin = rows2[i]["fecha_fin"].getFullYear();
+        var aini = rows2[i]["fecha_inicio"].getFullYear();
+        var fin = '';
+        var inicio = '';
+        
+        
+        if(dfin<10){
+          fin = afin+'-'+mfin+'-'+'0'+dfin;
+        }
+        if(mfin<10){
+          fin = afin+'-'+'0'+mfin+'-'+dfin;
+        }
+        if(mfin<10 && dfin<10){
+          fin = afin+'-'+'0'+mfin+'-'+'0'+dfin;
+        }
+        if(dini<10){
+          inicio = aini+'-'+mini+'-'+'0'+dini;
+        }
+        if(mini<10){
+          inicio = aini+'-'+'0'+mini+'-'+dini;
+        }
+        if(mini<10 && dini<10){
+          inicio = aini+'-'+'0'+mini+'-'+'0'+dini;
+        }
+        rows2[i].estado = estado;
+        rows2[i]["fecha_inicio"] = inicio;
+        rows2[i]["fecha_fin"] = fin;
+        
+      }
+    res.json({cursos : rows2});
+  });
+});
+
+
+router.post('/getUSerType', function(req, res, next) {
+  var id_user = req.body.id;
+  db_users.getUserType(id_user,function(rows,fields){
+    res.json(rows);
   });
 
 });
@@ -192,6 +280,45 @@ router.post('/getStudentsByCourse', function(req, res, next) {
   });
 
 });
+
+router.post('/setNotaActividad', function(req, res, next) {
+  var id_tarea = req.body.id_tarea;
+  var nota = req.body.nota;
+  var id_usuario = req.body.id_usuario;
+  db_users.setNotaActividad(nota,id_usuario,id_tarea,function(rows2,fields){
+    res.json({respuesta : rows2});
+  });
+
+});
+
+
+router.post('/updateActividad', function(req, res, next) {
+  var fecha_fin = req.body.fecha_fin;
+  var fecha_inicio = req.body.fecha_inicio;
+  var descripcion = req.body.descripcion;
+  var id_tarea = req.body.id_tarea;
+  db_users.updateActividad(fecha_fin,fecha_inicio,descripcion,id_tarea,function(rows2,fields){
+    res.json({respuesta : rows2});
+  });
+
+});
+
+
+//fecha_fin,fecha_incio,porcentaje_nota,descripcion,activa,id_tarea
+router.post('/nuevaActividad', function(req, res, next) {
+  var fecha_fin = req.body.fecha_fin;
+  var fecha_inicio = req.body.fecha_inicio;
+  var porcentaje_nota = req.body.porcentaje_nota;
+  var descripcion = req.body.descripcion;
+  var activa = req.body.activa;
+  var id_curso = req.body.id_curso;
+  db_users.nuevaActividad(fecha_fin,fecha_inicio,porcentaje_nota,descripcion,activa,id_curso,function(rows2,fields){
+    console.log("--",rows2);
+    res.json({respuesta : rows2});
+  });
+
+});
+
 
 router.post('/getTalleresByCourse', function(req, res, next) {
   var myCourse = req.body.id;

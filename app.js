@@ -33,8 +33,14 @@ app.use('/nameById', users);
 app.use('/userValidated', users);
 app.use('/getTalleres', users);
 app.use('/getDetallesTalleres', users);
-app.use('/getStatusDocument', users);
+app.use('/getTalleresPendientes', users);
+app.use('/getDocument', users);
+app.use('/getUserType', users);
 app.use('/getCoursesByTeacher', index);
+app.use('/setNotaActividad',index);
+app.use('/updateActividad',index);
+app.use('/nuevaActividad',index);
+app.use('/getDetailActivitiesCoursesByTeacher',index);
 app.use('/getStudentsByCourse', index);
 
 

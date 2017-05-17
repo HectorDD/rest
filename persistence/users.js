@@ -57,6 +57,16 @@ conn.executeSQLStatement(function(connection) {
 });
 };
 
+//select t.`id_tarea`, t.`descripcion`,t.`fecha_inicio`, t.`fecha_fin`, uc.`id_curso` from `TBtareas` as t inner join `TBusuarios_cursos` as uc on t.`id_curso`=uc.`id_curso` left join `TBdocumentos` as d on t.`id_tarea`=d.`id_tarea` where uc.`id_usuario`=? and d.`id` is NULL
+
+exports.getTalleresPendientes = function(id, complete){
+conn.executeSQLStatement(function(connection) {
+    connection.query("select t.`id_tarea`, t.`descripcion`,t.`fecha_inicio`, t.`fecha_fin`, uc.`id_curso` from `TBtareas` as t inner join `TBusuarios_cursos` as uc on t.`id_curso`=uc.`id_curso` left join `TBdocumentos` as d on t.`id_tarea`=d.`id_tarea` where uc.`id_usuario`=? and d.`id` is NULL", [id], function(err,row,fields){
+            if (err) throw err;
+            complete(row);
+        });
+});
+};
 
 exports.getNameById = function(id, complete){
 conn.executeSQLStatement(function(connection) {
@@ -96,6 +106,48 @@ conn.executeSQLStatement(function(connection) {
 });
 };
 
+//Update `TBdocumentos` as d SET d.`nota`=? where d.id_usuario=? and d.id_tarea=?;
+exports.setNotaActividad = function(nota,id_usuario,id_tarea, complete){
+conn.executeSQLStatement(function(connection) {
+    connection.query("Update `TBdocumentos` as d SET d.`nota`=? where d.id_usuario=? and d.id_tarea=? ", [nota,id_usuario,id_tarea], function(err,row,fields){
+            if (err) throw err;
+            complete(row);
+        });
+});
+};
+
+//Update `TBtareas` as t SET t.`fecha_inicio`=?, t.`fecha_fin`=?, t.`descripcion`=? where t.id_tarea=? and d.id_tarea=?;
+//CAST('2009-05-25' AS DATETIME)
+exports.updateActividad = function(fecha_fin,fecha_incio,descripcion,id_tarea, complete){
+conn.executeSQLStatement(function(connection) {
+    connection.query("Update `TBtareas` as t SET t.`fecha_inicio`=CAST(? AS DATETIME), t.`fecha_fin`=CAST(? AS DATETIME), t.`descripcion`=? where t.id_tarea=? ", [fecha_incio,fecha_fin,descripcion,id_tarea], function(err,row,fields){
+            if (err) throw err;
+            complete(row);
+        });
+});
+};
+
+exports.nuevaActividad = function(fecha_fin,fecha_inicio,porcentaje_nota,descripcion,activa,id_curso, complete){
+conn.executeSQLStatement(function(connection) {
+    connection.query("INSERT INTO `TBtareas`(`fecha_inicio`,`fecha_fin`,`porcentaje_nota`,`descripcion`,`activa`,`id_curso`) VALUES (CAST(? AS DATETIME),CAST(? AS DATETIME),?,?,?,?)", [fecha_inicio,fecha_fin,porcentaje_nota,descripcion,activa,id_curso], function(err,row,fields){
+            if (err) throw err;
+            complete(row);
+        });
+});
+};
+
+
+
+
+exports.getDetailActivitiesCoursesByTeacher = function(id_profesor, complete){
+conn.executeSQLStatement(function(connection) {
+    connection.query("SELECT t.id_tarea,t.fecha_inicio,t.fecha_fin,t.descripcion,t.id_curso from TBcursos as c inner join TBtareas as t on t.id_curso=c.id_curso WHERE c.id_propietario = ? ", [id_profesor], function(err,row,fields){
+            if (err) throw err;
+            complete(row);
+        });
+});
+};
+
 exports.getStudentsByCourse = function(id_curso, complete){
 conn.executeSQLStatement(function(connection) {
     connection.query("SELECT u.id_usuario,u.nombre_usuario,id_curso FROM TBusuarios_cursos as ec, TBusuarios as u WHERE ec.id_curso=? and ec.id_usuario = u.id_usuario;", [id_curso], function(err,row,fields){
@@ -105,13 +157,10 @@ conn.executeSQLStatement(function(connection) {
 });
 };
 
-exports.getStatusDocument = function(id_activity, id_user, complete){
+exports.getDocument = function(id_activity, id_user, complete){
 conn.executeSQLStatement(function(connection) {
-    connection.query("select nota from TBdocumentos where id_tarea=? and id_usuario=?; ", [id_activity,id_user], function(err,row,fields){
-            if(err){ return err;}
-            else if (!row.length) {                                                   
-                row = -1;
-            }
+    connection.query("select * from TBdocumentos where id_tarea=? and id_usuario=?; ", [id_activity,id_user], function(err,row,fields){
+            if(err) return err;
             complete(row);
         });
 });
@@ -125,5 +174,15 @@ conn.executeSQLStatement(function(connection) {
         });
 });
 };
+
+exports.getUserType = function(id_usuario, complete){
+conn.executeSQLStatement(function(connection) {
+    connection.query("select u.`rol` from `TBusuarios` as u where u.`id_usuario`=?;", [id_usuario], function(err,row,fields){
+            if (err) throw err;
+            complete(row);
+        });
+});
+};
+
 
 
