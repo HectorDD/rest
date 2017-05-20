@@ -106,6 +106,72 @@ conn.executeSQLStatement(function(connection) {
 });
 };
 
+exports.getCourses = function(complete){
+conn.executeSQLStatement(function(connection) {
+    connection.query("SELECT * from TBcursos", [], function(err,row,fields){
+            if (err) throw err;
+            complete(row);
+        });
+});
+};
+
+exports.getProfesores = function(tipo,complete){
+conn.executeSQLStatement(function(connection) {
+    connection.query("SELECT * from TBusuarios where rol=?", [tipo], function(err,row,fields){
+            if (err) throw err;
+            complete(row);
+        });
+});
+};
+
+exports.getAdministradores = function(tipo,complete){
+conn.executeSQLStatement(function(connection) {
+    connection.query("SELECT * from TBusuarios where rol=?", [tipo], function(err,row,fields){
+            if (err) throw err;
+            complete(row);
+        });
+});
+};
+
+exports.getStudents = function(tipo,complete){
+conn.executeSQLStatement(function(connection) {
+    connection.query("SELECT * from TBusuarios where rol=1", [tipo], function(err,row,fields){
+            if (err) throw err;
+            complete(row);
+        });
+});
+};
+
+exports.nuevoStudent = function(nombre_estudiante,contraseña,rol,complete){
+conn.executeSQLStatement(function(connection) {
+    connection.query("INSERT INTO `TBusuarios`(`nombre_usuario`,`contraseña`,`rol`) VALUES (?,?,?)", [nombre_estudiante,contraseña,rol], function(err,row,fields){
+            if (err) throw err;
+            complete(row);
+        });
+});
+};
+
+
+exports.nuevoDocumento = function(nombre,fecha_creacion,id_tarea,id_usuario,complete){
+var nota = null;
+conn.executeSQLStatement(function(connection) {
+    connection.query("INSERT INTO `TBdocumentos`(`nombre`,`fecha_creacion`,`nota`,`id_tarea`,`id_usuario`) VALUES (?,CAST(? AS DATETIME),?,?,?)", [nombre,fecha_creacion,nota,id_tarea,id_usuario], function(err,row,fields){
+            if (err) throw err;
+            complete(row);
+        });
+});
+};
+
+exports.nuevaMatricula = function(id_usuario,id_curso,complete){
+conn.executeSQLStatement(function(connection) {
+    connection.query("INSERT INTO `TBusuarios_cursos`(`id_usuario`,`id_curso`) VALUES (?,?)", [id_usuario,id_curso], function(err,row,fields){
+            if (err) throw err;
+            complete(row);
+        });
+});
+};
+
+
 //Update `TBdocumentos` as d SET d.`nota`=? where d.id_usuario=? and d.id_tarea=?;
 exports.setNotaActividad = function(nota,id_usuario,id_tarea, complete){
 conn.executeSQLStatement(function(connection) {
@@ -137,6 +203,16 @@ conn.executeSQLStatement(function(connection) {
 };
 
 
+exports.nuevoCurso = function(nombre_curso,id_propietario, complete){
+conn.executeSQLStatement(function(connection) {
+    connection.query("INSERT INTO `TBcursos`(`nombre_curso`,`id_propietario`) VALUES (?,?)", [nombre_curso,id_propietario], function(err,row,fields){
+            if (err) throw err;
+            complete(row);
+        });
+});
+};
+
+
 
 
 exports.getDetailActivitiesCoursesByTeacher = function(id_profesor, complete){
@@ -160,6 +236,15 @@ conn.executeSQLStatement(function(connection) {
 exports.getDocument = function(id_activity, id_user, complete){
 conn.executeSQLStatement(function(connection) {
     connection.query("select * from TBdocumentos where id_tarea=? and id_usuario=?; ", [id_activity,id_user], function(err,row,fields){
+            if(err) return err;
+            complete(row);
+        });
+});
+};
+
+exports.getUsuariosCursos = function(complete){
+conn.executeSQLStatement(function(connection) {
+    connection.query("select * from TBusuarios_cursos ", [], function(err,row,fields){
             if(err) return err;
             complete(row);
         });

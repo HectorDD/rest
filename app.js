@@ -37,9 +37,18 @@ app.use('/getTalleresPendientes', users);
 app.use('/getDocument', users);
 app.use('/getUserType', users);
 app.use('/getCoursesByTeacher', index);
+app.use('/getCourses', index);
+app.use('/getAdministradores', index);
+app.use('/getProfesores', index);
+app.use('/getEstudiantes', index);
 app.use('/setNotaActividad',index);
 app.use('/updateActividad',index);
 app.use('/nuevaActividad',index);
+app.use('/nuevoCurso',index);
+app.use('/nuevoDocumento',index);
+app.use('/nuevaMatricula',index);
+app.use('/nuevoEstudiante',index);
+app.use('/getUsuariosCursos',index);
 app.use('/getDetailActivitiesCoursesByTeacher',index);
 app.use('/getStudentsByCourse', index);
 

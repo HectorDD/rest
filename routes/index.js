@@ -107,7 +107,7 @@ router.post('/cursesByName', function(req, res, next) {
 router.post('/getTalleres', function(req, res, next) {
   var myUser = req.body.id;
   db_users.getTalleresbyId_Curso(myUser,function(rows2,fields){
-      res.json({documentos: rows2});
+      res.json({talleres: rows2});
   });
 });
 
@@ -118,10 +118,34 @@ router.post('/getDocument', function(req, res, next) {
   var estado = "";
   db_users.getDocument(id_activity,id_user,function(rows,fields){
     res.json({documento: rows});
-    
-    
   });
 });
+
+router.post('/nuevoDocumento', function(req, res, next) {
+  var nombre= req.body.nombre;
+  var fecha_creacion= req.body.fecha_creacion;
+  var id_tarea= req.body.id_tarea;
+  var id_usuario = req.body.id_usuario;
+  db_users.nuevoDocumento(nombre,fecha_creacion,id_tarea,id_usuario,function(rows,fields){
+    res.json({documento: rows});
+  });
+});
+
+router.post('/nuevaMatricula', function(req, res, next) {
+  var id_curso= req.body.id_curso;
+  var id_usuario = req.body.id_usuario;
+  db_users.nuevaMatricula(id_usuario,id_curso,function(rows,fields){
+    res.json({respuesta: rows});
+  });
+});
+
+router.post('/getUsuariosCursos', function(req, res, next) {
+  db_users.getUsuariosCursos(function(rows,fields){
+    res.json({usuarios_cursos: rows});
+  });
+});
+
+
 
 /*toma los talleres de los cursos en donde esta matriculado el estudiante basado en su nombre*/
 router.post('/getDetallesTalleres', function(req, res, next) {
@@ -208,6 +232,34 @@ router.post('/getCoursesByTeacher', function(req, res, next) {
   var myUser = req.body.id;
   db_users.getCoursesByTeacher(myUser,function(rows2,fields){
     res.json({cursos : rows2});
+  });
+});
+
+router.get('/getCourses', function(req, res, next) {
+  db_users.getCourses(function(rows2,fields){
+    res.json({cursos : rows2});
+  });
+});
+
+router.get('/getAdministradores', function(req, res, next) {
+  var tipo = 3;
+  db_users.getAdministradores(tipo,function(rows2,fields){
+
+    res.json({administradores : rows2});
+  });
+});
+
+router.get('/getProfesores', function(req, res, next) {
+  var tipo = 2;
+  db_users.getProfesores(tipo,function(rows2,fields){
+    res.json({profesores : rows2});
+  });
+});
+
+router.get('/getEstudiantes', function(req, res, next) {
+  var tipo = 1;
+  db_users.getStudents(tipo,function(rows2,fields){
+    res.json({estudiantes : rows2});
   });
 });
 
@@ -313,11 +365,30 @@ router.post('/nuevaActividad', function(req, res, next) {
   var activa = req.body.activa;
   var id_curso = req.body.id_curso;
   db_users.nuevaActividad(fecha_fin,fecha_inicio,porcentaje_nota,descripcion,activa,id_curso,function(rows2,fields){
-    console.log("--",rows2);
     res.json({respuesta : rows2});
   });
 
 });
+
+
+//fecha_fin,fecha_incio,porcentaje_nota,descripcion,activa,id_tarea
+router.post('/nuevoCurso', function(req, res, next) {
+  var nombre_curso = req.body.nombre_curso;
+  var id_propietario = req.body.id_propietario;
+  db_users.nuevoCurso(nombre_curso,id_propietario,function(rows2,fields){
+    res.json({respuesta : rows2});
+  });
+});
+
+router.post('/nuevoEstudiante', function(req, res, next) {
+  var nombre_estudiante = req.body.nombre_estudiante;
+  var contraseña = req.body.contraseña;
+  var rol = req.body.rol;
+  db_users.nuevoStudent(nombre_estudiante,contraseña,rol,function(rows2,fields){
+    res.json({respuesta : rows2});
+  });
+});
+
 
 
 router.post('/getTalleresByCourse', function(req, res, next) {
